@@ -14,8 +14,8 @@ def batch_create_courses(csv_file=None):
     批量创建课程
     """
     # Dify配置
-    DIFY_BASE_URL = "http://10.119.14.166"
-    DIFY_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMzg4YzJjZTktNjRjNi00NTIyLTljM2EtOGJkOTgzMjExOGU3IiwiZXhwIjoxNzQxOTQ0ODM0LCJpc3MiOiJTRUxGX0hPU1RFRCIsInN1YiI6IkNvbnNvbGUgQVBJIFBhc3Nwb3J0In0.88DkNM8IYPZ736I_Ow3bmpL6UWGE-HbLLtnH2-hdnXI"
+    DIFY_BASE_URL = "your_dify_base_url"
+    DIFY_TOKEN = "your_dify_token"
     try:
         # 创建SQL文件目录
         sql_dir = "dify_sql_files"
