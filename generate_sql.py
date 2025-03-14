@@ -60,9 +60,9 @@ sample_data = {
     'name': '电路理论',
     'icon': 11,
     'api_type': 'dify/chatflow',
-    'base_api': 'http://10.119.14.166/v1/',
+    'base_api': 'your_base_api',
     'redirect_link': None,
-    'token': 'app-0Dpb8f5NbsfvQAUbWWborU8a',
+    'token': 'your_token',
     'category': 'AI 课程/我的课程/电路理论/AI学伴',
     'desc': '授课教师：张峰',
     'prologue': '''欢迎来到《电路理论》课程～我是你的 AI 深度思考 助教🔹
