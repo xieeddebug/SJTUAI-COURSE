@@ -377,8 +377,8 @@ class DifyAutomation:
 
 def main():
     # 配置信息
-    DIFY_BASE_URL = "http://10.119.14.166"  # Dify 服务器地址
-    DIFY_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMzg4YzJjZTktNjRjNi00NTIyLTljM2EtOGJkOTgzMjExOGU3IiwiZXhwIjoxNzQxOTQ0ODM0LCJpc3MiOiJTRUxGX0hPU1RFRCIsInN1YiI6IkNvbnNvbGUgQVBJIFBhc3Nwb3J0In0.88DkNM8IYPZ736I_Ow3bmpL6UWGE-HbLLtnH2-hdnXI"
+    DIFY_BASE_URL = "your_dify_base_url"  # Dify 服务器地址
+    DIFY_TOKEN = "your_dify_token"
 
     # 创建自动化实例
     dify = DifyAutomation(DIFY_BASE_URL, DIFY_TOKEN)
