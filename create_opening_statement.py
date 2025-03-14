@@ -12,7 +12,7 @@ def read_course_info(csv_path):
 
 
 def get_deepseek_response(course_name, course_intro, course_problem):
-    client = OpenAI(api_key="sk-fb180ec725f4452eac937651e7f71940", base_url="https://api.deepseek.com")
+    client = OpenAI(api_key="your_api_key", base_url="https://api.deepseek.com")
     response = client.chat.completions.create(
         model="deepseek-chat",
         messages=[
