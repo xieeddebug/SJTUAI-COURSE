@@ -1,0 +1,862 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPT 智能备注工具 - 上海交通大学</title>
+    <style>
+        :root {
+            --primary: #c5181f; /* 党政红 */
+            --primary-light: #f8e7e7; /* 浅红色 */
+            --primary-dark: #a31419; /* 深红色 */
+            --primary-darker: #8a1014; /* 更深红色 */
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --dark: #111827;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --border-radius: 0.5rem;
+            --border-radius-lg: 0.75rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background-color: #f9fafb;
+            color: var(--dark);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-header {
+            background: var(--primary-darker);
+            color: white;
+            padding: 0.875rem 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .top-header-content {
+            display: flex;
+            align-items: center;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            height: 40px;
+            margin-right: 24px;
+        }
+
+        .logo img {
+            height: 100%;
+            width: auto;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .app-container {
+            max-width: 1600px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 1.5rem 2rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-grow: 1;
+            min-height: 500px;
+        }
+
+        .workspace-panel {
+            background: white;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            height: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .workspace-panel:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .ribbon {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 120px;
+            height: 120px;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        .ribbon-text {
+            position: absolute;
+            display: block;
+            width: 180px;
+            padding: 8px 0;
+            background-color: var(--primary);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.12);
+            color: white;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            text-align: center;
+            font-weight: 700;
+            transform: rotate(45deg);
+            right: -40px;
+            top: 30px;
+        }
+
+        .panel-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: #ffffff;
+        }
+
+        .panel-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            font-size: 1.125rem;
+        }
+
+        .panel-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .panel-subtitle {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+            margin-top: 0.25rem;
+        }
+
+        .panel-content {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            overflow: auto;
+        }
+
+        .upload-container {
+            border: 2px dashed var(--gray-300);
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-color: var(--gray-100);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-container:hover {
+            border-color: var(--primary);
+            background-color: rgba(197, 24, 31, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1.25rem;
+        }
+
+        .upload-title {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .upload-subtitle {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.75rem;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            outline: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(197, 24, 31, 0.2);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(197, 24, 31, 0.25);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-outline {
+            background-color: white;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary-light);
+        }
+
+        .file-info {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            background-color: white;
+            border: 1px solid var(--gray-200);
+            text-align: left;
+            display: none;
+        }
+
+        .file-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .file-size {
+            color: var(--gray-500);
+            font-size: 0.875rem;
+        }
+
+        .processing-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .status-heading {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            align-items: center;
+        }
+
+        .status-title {
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--primary);
+        }
+
+        .progress-container {
+            height: 8px;
+            background-color: var(--gray-200);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .status-text {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        .step-indicators {
+            display: flex;
+            margin-top: 1.25rem;
+            border-top: 1px solid var(--gray-200);
+            padding-top: 1rem;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            padding-top: 1rem;
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        .step::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--gray-300);
+        }
+
+        .step.active {
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+
+        .step.active::before {
+            background-color: var(--primary);
+        }
+
+        .download-section {
+            margin-top: 1.5rem;
+        }
+
+        .download-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .download-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.875rem;
+            border-radius: var(--border-radius);
+            background-color: white;
+            border: 1px solid var(--gray-300);
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .download-button:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background-color: var(--primary-light);
+        }
+
+        .download-button.active {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .download-icon {
+            font-size: 1.25rem;
+        }
+
+        .notice-section {
+            margin-top: auto;
+            padding-top: 1rem;
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .notice-icon {
+            color: var(--primary);
+        }
+
+        .empty-state {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: var(--gray-400);
+            text-align: center;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--gray-300);
+        }
+
+        .empty-title {
+            font-size: 1.125rem;
+            font-weight: 500;
+            color: var(--gray-600);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-desc {
+            color: var(--gray-500);
+            max-width: 300px;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem 0;
+            background-color: white;
+            border-top: 1px solid var(--gray-200);
+            color: var(--gray-500);
+            font-size: 0.875rem;
+            margin-top: 2rem;
+        }
+
+        .school-icon {
+            margin-right: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+            
+            .app-container {
+                padding: 1rem;
+            }
+            
+            .top-header-content {
+                padding: 0 1rem;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            
+            .header-title {
+                font-size: 1.25rem;
+            }
+        }
+
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--gray-100);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--gray-300);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gray-400);
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部红色横条 -->
+    <div class="top-header">
+        <div class="top-header-content">
+            <div class="logo">
+                <img src="LogoWhite@2x.png" alt="上海交通大学">
+            </div>
+            <div class="header-title">PPT 智能备注工具</div>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <div class="workspace">
+            <!-- 左侧上传面板 -->
+            <div class="workspace-panel">
+                <div class="panel-header">
+                    <div class="panel-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="panel-title">上传 PPT 文件</h2>
+                        <p class="panel-subtitle">系统将自动提取 PPT 中的文字内容并进行智能润色</p>
+                    </div>
+                </div>
+
+                <div class="panel-content">
+                    <div class="upload-container" id="upload-area">
+                        <div class="upload-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                                <polyline points="13 2 13 9 20 9"></polyline>
+                            </svg>
+                        </div>
+                        <h3 class="upload-title">点击或拖拽 PPT 文件到此处</h3>
+                        <p class="upload-subtitle">支持 .ppt 和 .pptx 格式文件</p>
+                        <button class="btn btn-primary" id="upload-btn">选择文件</button>
+                        <input type="file" id="file-input" style="display: none" accept=".ppt,.pptx">
+                    </div>
+                    
+                    <div class="file-info" id="file-info">
+                        <div class="file-name" id="file-name">文件名: presentation.pptx</div>
+                        <div class="file-size" id="file-size">文件大小: 2.5 MB</div>
+                    </div>
+                    
+                    <div class="notice-section">
+                        <span class="notice-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                        </span>
+                        <span>为保障文件安全，所有上传的文件将在下载完成后 1 小时内自动删除</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧处理和下载面板 -->
+            <div class="workspace-panel">
+                <div class="ribbon">
+                    <span class="ribbon-text">AI 智能辅助</span>
+                </div>
+                
+                <div class="panel-header">
+                    <div class="panel-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="panel-title">处理状态与下载</h2>
+                        <p class="panel-subtitle">查看处理进度并下载生成的文件</p>
+                    </div>
+                </div>
+
+                <div class="panel-content">
+                    <!-- 空状态 -->
+                    <div class="empty-state" id="empty-state">
+                        <div class="empty-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="8" y1="12" x2="16" y2="12"></line>
+                                <line x1="12" y1="8" x2="12" y2="16"></line>
+                            </svg>
+                        </div>
+                        <h3 class="empty-title">等待上传文件</h3>
+                        <p class="empty-desc">请在左侧上传 PPT 文件，系统将自动处理</p>
+                    </div>
+
+                    <!-- 处理状态 -->
+                    <div id="processing-content" style="display: none; height: 100%;">
+                        <div class="processing-section">
+                            <div class="status-heading">
+                                <div class="status-title">
+                                    <span class="status-indicator"></span>
+                                    <span>处理进度</span>
+                                </div>
+                                <span id="progress-percentage">0%</span>
+                            </div>
+
+                            <div class="progress-container">
+                                <div class="progress-bar" id="progress-bar"></div>
+                            </div>
+
+                            <div class="status-text" id="status-text">正在读取 PPT 文件...</div>
+
+                            <div class="step-indicators">
+                                <div class="step active" id="step-1">提取文字</div>
+                                <div class="step" id="step-2">AI 润色</div>
+                                <div class="step" id="step-3">写入备注</div>
+                                <div class="step" id="step-4">生成文档</div>
+                            </div>
+                        </div>
+
+                        <div class="download-section" id="download-section">
+                            <div class="status-heading">
+                                <div class="status-title">
+                                    <span class="status-indicator"></span>
+                                    <span>下载文件</span>
+                                </div>
+                            </div>
+
+                            <div class="download-options">
+                                <button class="download-button" id="download-ppt">
+                                    <span class="download-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                                            <polyline points="13 2 13 9 20 9"></polyline>
+                                        </svg>
+                                    </span>
+                                    下载含备注 PPT
+                                </button>
+                                <button class="download-button" id="download-word">
+                                    <span class="download-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                                            <polyline points="14 2 14 9 20 9"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10 9 9 9 8 9"></polyline>
+                                        </svg>
+                                    </span>
+                                    下载备注 Word 文档
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="school-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+            </svg>
+        </div>
+        <span>© 2025 上海交通大学</span>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM 元素引用
+            const uploadBtn = document.getElementById('upload-btn');
+            const fileInput = document.getElementById('file-input');
+            const uploadArea = document.getElementById('upload-area');
+            const fileInfo = document.getElementById('file-info');
+            const fileName = document.getElementById('file-name');
+            const fileSize = document.getElementById('file-size');
+            const emptyState = document.getElementById('empty-state');
+            const processingContent = document.getElementById('processing-content');
+            const progressBar = document.getElementById('progress-bar');
+            const progressPercentage = document.getElementById('progress-percentage');
+            const statusText = document.getElementById('status-text');
+            const downloadSection = document.getElementById('download-section');
+            const downloadPptBtn = document.getElementById('download-ppt');
+            const downloadWordBtn = document.getElementById('download-word');
+            
+            // 上传按钮点击事件
+            uploadBtn.addEventListener('click', function() {
+                fileInput.click();
+            });
+            
+            // 文件选择处理
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    const file = e.target.files[0];
+                    
+                    // 检查文件类型
+                    if (!(file.name.endsWith('.ppt') || file.name.endsWith('.pptx'))) {
+                        alert('请上传PPT文件（.ppt或.pptx格式）');
+                        return;
+                    }
+                    
+                    // 显示文件信息
+                    fileName.textContent = '文件名: ' + file.name;
+                    fileSize.textContent = '文件大小: ' + formatFileSize(file.size);
+                    fileInfo.style.display = 'block';
+                    
+                    // 显示处理界面
+                    emptyState.style.display = 'none';
+                    processingContent.style.display = 'block';
+                    
+                    // 设置下载区域为非活跃状态
+                    downloadSection.querySelector('.status-indicator').style.backgroundColor = '#d1d5db';
+                    downloadPptBtn.classList.remove('active');
+                    downloadWordBtn.classList.remove('active');
+                    downloadPptBtn.disabled = true;
+                    downloadWordBtn.disabled = true;
+                    
+                    // 模拟进度
+                    simulateProgress();
+                }
+            });
+            
+            // 拖拽功能
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.style.borderColor = 'var(--primary)';
+                this.style.backgroundColor = 'rgba(197, 24, 31, 0.05)';
+            });
+            
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.style.borderColor = 'var(--gray-300)';
+                this.style.backgroundColor = 'var(--gray-100)';
+            });
+            
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.style.borderColor = 'var(--gray-300)';
+                this.style.backgroundColor = 'var(--gray-100)';
+                
+                if (e.dataTransfer.files.length > 0) {
+                    const file = e.dataTransfer.files[0];
+                    
+                    // 检查文件类型
+                    if (file.name.endsWith('.ppt') || file.name.endsWith('.pptx')) {
+                        fileInput.files = e.dataTransfer.files;
+                        
+                        // 显示文件信息
+                        fileName.textContent = '文件名: ' + file.name;
+                        fileSize.textContent = '文件大小: ' + formatFileSize(file.size);
+                        fileInfo.style.display = 'block';
+                        
+                        // 显示处理界面
+                        emptyState.style.display = 'none';
+                        processingContent.style.display = 'block';
+                        
+                        // 设置下载区域为非活跃状态
+                        downloadSection.querySelector('.status-indicator').style.backgroundColor = '#d1d5db';
+                        downloadPptBtn.classList.remove('active');
+                        downloadWordBtn.classList.remove('active');
+                        downloadPptBtn.disabled = true;
+                        downloadWordBtn.disabled = true;
+                        
+                        // 模拟进度
+                        simulateProgress();
+                    } else {
+                        alert('请上传PPT文件（.ppt或.pptx格式）');
+                    }
+                }
+            });
+            
+            // 格式化文件大小
+            function formatFileSize(bytes) {
+                if (bytes < 1024) {
+                    return bytes + ' B';
+                } else if (bytes < 1024 * 1024) {
+                    return (bytes / 1024).toFixed(2) + ' KB';
+                } else {
+                    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+                }
+            }
+            
+            // 模拟处理进度
+            function simulateProgress() {
+                let progress = 0;
+                
+                // 重置所有步骤状态
+                document.querySelectorAll('.step').forEach(step => {
+                    step.classList.remove('active');
+                });
+                
+                // 设置第一步为活跃状态
+                document.getElementById('step-1').classList.add('active');
+                
+                const interval = setInterval(() => {
+                    progress += 2;
+                    progressBar.style.width = progress + '%';
+                    progressPercentage.textContent = progress + '%';
+                    
+                    // 更新步骤状态
+                    if (progress < 25) {
+                        statusText.textContent = '正在读取PPT文件...';
+                        document.getElementById('step-1').classList.add('active');
+                        document.getElementById('step-2').classList.remove('active');
+                        document.getElementById('step-3').classList.remove('active');
+                        document.getElementById('step-4').classList.remove('active');
+                    } else if (progress < 50) {
+                        statusText.textContent = '正在提取PPT文字内容...';
+                        document.getElementById('step-1').classList.add('active');
+                        document.getElementById('step-2').classList.add('active');
+                        document.getElementById('step-3').classList.remove('active');
+                        document.getElementById('step-4').classList.remove('active');
+                    } else if (progress < 75) {
+                        statusText.textContent = '正在进行智能文本润色...';
+                        document.getElementById('step-1').classList.add('active');
+                        document.getElementById('step-2').classList.add('active');
+                        document.getElementById('step-3').classList.add('active');
+                        document.getElementById('step-4').classList.remove('active');
+                    } else if (progress < 100) {
+                        statusText.textContent = '正在生成含备注PPT和Word文档...';
+                        document.getElementById('step-1').classList.add('active');
+                        document.getElementById('step-2').classList.add('active');
+                        document.getElementById('step-3').classList.add('active');
+                        document.getElementById('step-4').classList.add('active');
+                    }
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        statusText.textContent = '文件处理完成！';
+                        
+                        // 激活下载区域
+                        downloadSection.querySelector('.status-indicator').style.backgroundColor = 'var(--primary)';
+                        downloadPptBtn.classList.add('active');
+                        downloadWordBtn.classList.add('active');
+                        downloadPptBtn.disabled = false;
+                        downloadWordBtn.disabled = false;
+                    }
+                }, 100);
+            }
+            
+            // 下载按钮点击事件
+            downloadPptBtn.addEventListener('click', function() {
+                if (this.disabled) return;
+                alert('下载包含备注的PPT文件');
+                // 实际实现时，这里会触发后端下载逻辑
+            });
+            
+            downloadWordBtn.addEventListener('click', function() {
+                if (this.disabled) return;
+                alert('下载备注汇总Word文档');
+                // 实际实现时，这里会触发后端下载逻辑
+            });
+        });
+    </script>
+
+
+</body></html>

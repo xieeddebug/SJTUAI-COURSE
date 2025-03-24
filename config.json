@@ -1,0 +1,8 @@
+{
+    "token": "app-wj2aSQ2rXSz5NjCMzceqXd40",
+    "output_dir": "generated_sql_files",
+    "base_seq": 3000,
+    "max_name_length": 50,
+    "max_teacher_length": 20,
+    "base_api": "http://10.119.14.166/v1/"
+}
