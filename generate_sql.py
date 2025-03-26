@@ -19,7 +19,9 @@ def generate_insert_sql(data):
         'category',
         '`desc`',
         'prologue',
-        'enabled'
+        'enabled',
+        'visible',
+        'main_app'
     ]
     
     # 构建 INSERT 语句的字段部分
@@ -30,7 +32,10 @@ def generate_insert_sql(data):
     for field in fields:
         val = data.get(field.strip('`'))  # 移除字段名的反引号以获取正确的值
         if val is None:
-            values.append('NULL')
+            if field in ['visible', 'main_app']:
+                values.append('1')  # 为visible和main_app设置默认值1
+            else:
+                values.append('NULL')
         elif field == 'app_id':
             values.append(f"uuid()")
         elif isinstance(val, (int, float)):

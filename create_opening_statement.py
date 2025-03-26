@@ -72,7 +72,7 @@ def handle_sql(course_name, response):
         
 
 def main():
-    csv_path = "AI+课程主页建设素材收集_答卷数据_2025_03_16_14_35_11(1).csv"
+    csv_path = "AI+课程主页建设素材收集_答卷数据_2025_03_26_09_41_50.csv"
     course_names, course_intros, course_problems = read_course_info(csv_path)
     for course_name, course_intro, course_problem in zip(course_names, course_intros, course_problems):
         response = get_deepseek_response(course_name, course_intro, course_problem)

@@ -15,7 +15,7 @@ def batch_create_courses(csv_file=None):
     """
     # Dify配置
     DIFY_BASE_URL = "http://10.119.14.166"
-    DIFY_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMzIzOTMyNTQtODJmYS00NGNmLTk3NzUtNWU2YzI2MjZhMjRkIiwiZXhwIjoxNzQyMTkyNDIzLCJpc3MiOiJTRUxGX0hPU1RFRCIsInN1YiI6IkNvbnNvbGUgQVBJIFBhc3Nwb3J0In0.zOR5huN_MzBq543-ppxg5G-Ou4Y-Mvq7sUhUodJFM3A"
+    DIFY_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMzIzOTMyNTQtODJmYS00NGNmLTk3NzUtNWU2YzI2MjZhMjRkIiwiZXhwIjoxNzQyOTkxODkwLCJpc3MiOiJTRUxGX0hPU1RFRCIsInN1YiI6IkNvbnNvbGUgQVBJIFBhc3Nwb3J0In0.XHVQuM_9b1zGqWOzyAURPTjSVjZq7alemVbHayNCViU"
     
     try:
         # 创建SQL文件目录
@@ -150,9 +150,9 @@ def batch_create_courses(csv_file=None):
                         'icon': 11,
                         'api_type': 'dify/chatflow',
                         'base_api': DIFY_BASE_URL + '/v1/',
-                        'redirect_link': redirect_url,
+                        'redirect_link': None,
                         'token': api_key,
-                        'category': f'AI 课程/AI+课程/{course_name}',
+                        'category': f'AI 课程/AI+课程/{course_name}/AI学伴',
                         'desc': '授课教师：' + teacher,
                         'prologue': opening_statement,
                         'enabled': 1

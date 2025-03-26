@@ -1,5 +1,3 @@
-
--- 临床微生物学检验I (李敏)
 INSERT INTO application (
     seq,
     app_id,
